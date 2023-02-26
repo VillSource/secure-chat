@@ -1,7 +1,7 @@
 import pytest
 from click.testing import CliRunner
 
-from cli_project_name.__main_click__ import cmd
+from securechat.__main__ import cmd
 
 
 class Test_click:

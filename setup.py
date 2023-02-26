@@ -4,7 +4,7 @@ from typing import Dict
 import setuptools
 
 
-MODULE_NAME = "cli_project_name"
+MODULE_NAME = "securechat"
 REPOSITORY_URL = f"https://github.com/thombashi/{MODULE_NAME:s}"
 REQUIREMENT_DIR = "requirements"
 ENCODING = "utf8"
@@ -76,8 +76,8 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             # Remove entry points at below if unnecessary
-            "cli_project_name=cli_project_name.__main__:main",
-            "cli_project_name_click=cli_project_name.__main_click__:cmd",
+            # "securechat=securechat.__main__:main",
+            "securechat=securechat.__main__:cmd",
         ]
     },
 )

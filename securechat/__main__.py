@@ -8,6 +8,7 @@ from .__version__ import __version__
 from ._const import MODULE_NAME
 from ._logger import LogLevel, initialize_logger, logger
 
+from .server import start_server
 
 COMMAND_EPILOG = dedent(
     """\
@@ -67,7 +68,7 @@ def cmd(ctx, log_level: str, verbosity_level: int, profile: Optional[int]):
 
 @cmd.command(epilog=COMMAND_EPILOG)
 @click.pass_context
-def version(ctx):
+def versions(ctx):
     """
     Show version information
     """
@@ -76,7 +77,7 @@ def version(ctx):
 
     click.echo(
         envinfopy.dumps(
-            ["cli_project_name"],
+            ["securechat"],
             format="markdown",
             verbosity_level=ctx.obj[Context.VERBOSITY_LEVEL],
         )
@@ -129,6 +130,14 @@ def subcmd_path(ctx, filepath):
     with open(filepath) as f:
         print(f.read())
 
+
+@cmd.command(epilog=COMMAND_EPILOG)
+@click.pass_context
+def runserver(ctx):
+    """
+    Run chat server.
+    """
+    start_server()
 
 if __name__ == "__main__":
     cmd()
