@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  server:
+    build: .
+    ports:
+      - "65432:65432"
+    volumes:
+      - "./:/chatserver"
+    stdin_open: true
+  client1:
+    build: .
+    volumes:
+      - "./:/chatserver"
+    stdin_open: true
+  client2:
+    build: .
+    volumes:
+      - "./:/chatserver"
+    stdin_open: true
+
+

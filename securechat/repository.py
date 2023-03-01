@@ -49,6 +49,6 @@ def create_server_table():
     ])
     DB_SERVER_CONNECTION.close()
 
-def init_server()->SqliteDatabase:
+def init_db()->SqliteDatabase:
     create_server_table()
     return DB_SERVER_CONNECTION

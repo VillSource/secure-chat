@@ -5,10 +5,12 @@ from typing import Optional
 import click
 
 from .__version__ import __version__
-from ._const import MODULE_NAME
+from ._const import MODULE_NAME, PRIVATE_KEY, PUBLIC_KEY
 from ._logger import LogLevel, initialize_logger, logger
 
 from .server import start_server
+from .client import gochat
+from .key import generateKeys
 
 COMMAND_EPILOG = dedent(
     """\
@@ -138,6 +140,26 @@ def runserver(ctx):
     Run chat server.
     """
     start_server()
+
+@cmd.command(epilog=COMMAND_EPILOG)
+@click.pass_context
+def connect(ctx):
+    gochat()
+
+@cmd.command(epilog=COMMAND_EPILOG)
+@click.pass_context
+@click.argument("name", type=str, required=True)
+def start(ctx,name):
+    gochat(name)
+   
+@cmd.command(epilog=COMMAND_EPILOG)
+@click.pass_context
+def keygen(ctx):
+    generateKeys()
+    with open(PUBLIC_KEY, 'r') as p:
+        print(p.read())
+    with open(PRIVATE_KEY, 'r') as p:
+        print(p.read())
 
 if __name__ == "__main__":
     cmd()
