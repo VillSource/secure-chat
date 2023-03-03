@@ -30,7 +30,7 @@ def encrypt(message:str, key:PublicKey)->bytes:
 
 def decrypt(ciphertext:bytes, key:PrivateKey):
     try:
-        return rsa.decrypt(ciphertext, key).decode(FORMAT)
+        return rsa.decrypt(base64.b64decode(ciphertext), key).decode(FORMAT)
     except:
         return False
     
@@ -44,3 +44,15 @@ def verify(message:str, signature:bytes, key:PublicKey):
         return False
     
 
+def loadKeysBase64()->tuple[str, str]:
+    assert os.path.exists(PUBLIC_KEY) == True
+    assert os.path.exists(PUBLIC_KEY) == True
+
+    with open(PUBLIC_KEY, 'r') as p:
+        publicKey = p.read()
+    with open(PRIVATE_KEY, 'r') as p:
+        privateKey = p.read()
+    return privateKey, publicKey
+
+def loadB64Key(key:bytes)->PublicKey:
+    return rsa.PublicKey.load_pkcs1(key)

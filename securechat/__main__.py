@@ -5,161 +5,52 @@ from typing import Optional
 import click
 
 from .__version__ import __version__
-from ._const import MODULE_NAME, PRIVATE_KEY, PUBLIC_KEY
-from ._logger import LogLevel, initialize_logger, logger
+from ._const import MODULE_NAME, PRIVATE_KEY, PUBLIC_KEY,HOST,PORT
 
-from .server import start_server
-from .client import gochat
-from .key import generateKeys
+from .key import generateKeys, loadKeysBase64
 
 COMMAND_EPILOG = dedent(
     """\
-    Issue tracker: https://github.com/:owner/:repo/issues
+    Issue tracker: https://github.com/VillSource/secure-chat/issues
     """
 )
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], obj={})
 
 
-@unique
-class Context(Enum):
-    LOG_LEVEL = auto()
-    VERBOSITY_LEVEL = auto()
-
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=__version__, message="%(prog)s %(version)s")
-@click.option("--debug", "log_level", flag_value=LogLevel.DEBUG, help="For debug print.")
-@click.option(
-    "-q",
-    "--quiet",
-    "log_level",
-    flag_value=LogLevel.QUIET,
-    help="Suppress execution log messages.",
-)
-@click.option("-v", "--verbose", "verbosity_level", count=True)
-@click.option("--profile", is_flag=True, help="Show profile.")
 @click.pass_context
-def cmd(ctx, log_level: str, verbosity_level: int, profile: Optional[int]):
+def cmd(ctx):
     """
-    common cmd help
+    common securechat help
     """
-
-    ctx.obj[Context.LOG_LEVEL] = LogLevel.INFO if log_level is None else log_level
-    ctx.obj[Context.VERBOSITY_LEVEL] = verbosity_level
-
-    initialize_logger(name=f"{MODULE_NAME:s}", log_level=ctx.obj[Context.LOG_LEVEL])
-
-    if profile:
-        import atexit
-        import sys
-
-        from pyinstrument import Profiler
-
-        profiler = Profiler()
-        profiler.start()
-
-        logger.debug("start profiling...")
-
-        def exit_profile():
-            logger.debug("profiling completed")
-            profiler.stop()
-            print(profiler.output_text(unicode=True, color=True), file=sys.stderr)
-
-        atexit.register(exit_profile)
-
+    pass
 
 @cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-def versions(ctx):
-    """
-    Show version information
-    """
-
-    import envinfopy
-
-    click.echo(
-        envinfopy.dumps(
-            ["securechat"],
-            format="markdown",
-            verbosity_level=ctx.obj[Context.VERBOSITY_LEVEL],
-        )
-    )
-
-
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-@click.argument("filepaths", type=str, nargs=-1)
-@click.option("--flag", "is_flag", is_flag=True, help="")
-@click.option("--abc/--no-abc", default=False)
-def subcmd_flag(ctx, filepaths, is_flag, abc):
-    """
-    Demonstrate flag options.
-    """
-
-    verbosity_level = ctx.obj[Context.VERBOSITY_LEVEL]
-
-    logger.debug(f"is_flag={is_flag}, abc={abc} verbosity_level: {verbosity_level}")
-
-    for filepath in filepaths:
-        click.echo(filepath)
-
-
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-@click.argument("choice", type=click.Choice(["hoge", "foo"]))
-@click.option("--opt-choice", type=click.Choice(["hoge", "foo"]))
-def subcmd_choice(ctx, choice: str, opt_choice: str):
-    """
-    Demonstrate click.Choice type.
-    """
-
-    verbosity_level = ctx.obj[Context.VERBOSITY_LEVEL]
-
-    logger.debug(f"choice={choice}, opt_choice={opt_choice} verbosity_level: {verbosity_level}")
-
-    click.echo(choice)
-    click.echo(opt_choice)
-
-
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.argument("filepath", type=click.Path(exists=True))
-@click.pass_context
-def subcmd_path(ctx, filepath):
-    """
-    Demonstrate subcommand that takes a file as an input.
-    """
-
-    with open(filepath) as f:
-        print(f.read())
-
-
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-def runserver(ctx):
-    """
-    Run chat server.
-    """
-    start_server()
-
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-def connect(ctx):
-    gochat()
-
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-@click.argument("name", type=str, required=True)
-def start(ctx,name):
-    gochat(name)
-   
-@cmd.command(epilog=COMMAND_EPILOG)
-@click.pass_context
-def keygen(ctx):
+def genkey():
     generateKeys()
-    with open(PUBLIC_KEY, 'r') as p:
-        print(p.read())
-    with open(PRIVATE_KEY, 'r') as p:
-        print(p.read())
+    print(*loadKeysBase64())
+
+@cmd.command(epilog=COMMAND_EPILOG)
+def showkey():
+    print(*loadKeysBase64())
+
+@cmd.command(epilog=COMMAND_EPILOG)
+@click.option("--host", default="", type=str)
+@click.option("--port", default=65432, type=int)
+@click.option("--max-client", default=10, type=int)
+def runserver(host, port, max_client):
+    from .server import startServer
+    startServer(host,port, max_client)
+
+@cmd.command(epilog=COMMAND_EPILOG)
+@click.option("--host", default="server", type=str)
+@click.option("--port", default=65432, type=int)
+def connect(host,port):
+    from .client import goChat
+    goChat(host,port)
+
 
 if __name__ == "__main__":
     cmd()
